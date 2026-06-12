@@ -62,6 +62,9 @@ fun TleScreen(
 
     var showSettingsDialog by remember { mutableStateOf(false) }
     val passResult by viewModel.passResult.collectAsState()
+    
+    val isEnglish by viewModel.isEnglish.collectAsState()
+    val t = { fa: String, en: String -> if (isEnglish) en else fa }
 
     Scaffold(
         topBar = {
@@ -86,6 +89,31 @@ fun TleScreen(
                         )
                     }
                 },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { viewModel.toggleLanguage() },
+                        modifier = Modifier.testTag("language_toggle_button")
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = "تغییر زبان / Change Language",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (isEnglish) "FA" else "EN",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = { showSettingsDialog = true },
@@ -105,8 +133,9 @@ fun TleScreen(
         },
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
-        // Render in Right-to-Left (Persian) by default, only TLE text box is forced LTR
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        // Render dynamically in RTL or LTR based on selected language
+        val layoutDirection = if (isEnglish) LayoutDirection.Ltr else LayoutDirection.Rtl
+        CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
             if (showSettingsDialog) {
                 SettingsDialog(
                     viewModel = viewModel,
@@ -141,14 +170,14 @@ fun TleScreen(
                             .widthIn(max = 600.dp)
                     ) {
                         Text(
-                            text = "جستجوی مداری ماهواره‌ها",
+                            text = t("جستجوی مداری ماهواره‌ها", "Satellite Orbit Search"),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "نام ماهواره (مثلاً ISS) یا Norad ID (مانند 25544) را وارد کنید تا آخرین TLE آن مستقیماً دریافت شود.",
+                            text = t("نام ماهواره (مثلاً ISS) یا Norad ID (مانند 25544) را وارد کنید تا آخرین TLE آن مستقیماً دریافت شود.", "Enter satellite name (e.g. ISS) or Norad ID (e.g. 25544) to update its latest TLE directly."),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.secondary,
                             textAlign = TextAlign.Center,
@@ -176,8 +205,8 @@ fun TleScreen(
                             OutlinedTextField(
                                 value = query,
                                 onValueChange = { viewModel.onQueryChanged(it) },
-                                label = { Text("نام یا شناسه ماهواره") },
-                                placeholder = { Text("مثلاً ISS یا 25544") },
+                                label = { Text(t("نام یا شناسه ماهواره", "Satellite Name or ID")) },
+                                placeholder = { Text(t("مثلاً ISS یا 25544", "e.g. ISS or 25544")) },
                                 singleLine = true,
                                 leadingIcon = {
                                     Icon(
@@ -190,7 +219,7 @@ fun TleScreen(
                                         IconButton(onClick = { viewModel.onQueryChanged("") }) {
                                             Icon(
                                                 imageVector = Icons.Default.Close,
-                                                contentDescription = "پاک کردن"
+                                                contentDescription = t("پاک کردن", "Clear")
                                             )
                                         }
                                     }
@@ -229,7 +258,7 @@ fun TleScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "دریافت اطلاعات TLE",
+                                    text = t("دریافت اطلاعات TLE", "Search TLE Details"),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
                                 )
@@ -248,7 +277,7 @@ fun TleScreen(
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
-                                text = "ماهواره‌های نشان‌شده (علاقه‌مندی‌ها):",
+                                text = t("ماهواره‌های نشان‌شده (علاقه‌مندی‌ها):", "Starred Satellites (Favorites):"),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
@@ -280,7 +309,7 @@ fun TleScreen(
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Close,
-                                                    contentDescription = "حذف از علاقه‌مندی‌ها",
+                                                    contentDescription = t("حذف از علاقه‌مندی‌ها", "Remove from favorites"),
                                                     tint = MaterialTheme.colorScheme.error,
                                                     modifier = Modifier.size(12.dp)
                                                 )
@@ -305,8 +334,8 @@ fun TleScreen(
                     is TleUiState.Idle -> {
                         item {
                             EmptyPlaceholder(
-                                title = "آماده دریافت داده",
-                                subtitle = "شناسه یا نام ماهواره را در بالا وارد کنید تا اطلاعات مداری زنده آن نمایش داده شود."
+                                title = t("آماده دریافت داده", "Ready to fetch data"),
+                                subtitle = t("شناسه یا نام ماهواره را در بالا وارد کنید تا اطلاعات مداری زنده آن نمایش داده شود.", "Enter satellite ID or name above to display its real-time orbital information.")
                             )
                         }
                     }
@@ -322,7 +351,7 @@ fun TleScreen(
                                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "درحال اتصال به سیستم Celestrak و تحلیل داده‌ها...",
+                                    text = t("درحال اتصال به سیستم Celestrak و تحلیل داده‌ها...", "Connecting to Celestrak database and analyzing orbital logs..."),
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.SemiBold
@@ -342,8 +371,8 @@ fun TleScreen(
                         if (state.satellites.isEmpty()) {
                             item {
                                 EmptyPlaceholder(
-                                    title = "ماهواره‌ای یافت نشد",
-                                    subtitle = "لطفاً مجدداً با عبارتی دیگر جستجو کنید."
+                                    title = t("ماهواره‌ای یافت نشد", "No satellite found"),
+                                    subtitle = t("لطفاً مجدداً با عبارتی دیگر جستجو کنید.", "Please search with another name or ID.")
                                 )
                             }
                         } else {
@@ -352,12 +381,14 @@ fun TleScreen(
                                 TleCard(
                                     tle = tle,
                                     isFavorite = isFav,
+                                    isEnglish = isEnglish,
                                     onToggleFavorite = { viewModel.toggleFavorite(tle.noradId, tle.name) },
                                     onShare = { shareTleAsText(context, tle.name, tle.rawTle) },
                                     onDownload = { downloadTleAsTxt(context, tle.name, tle.rawTle) },
                                     onCopy = {
                                         clipboardManager.setText(AnnotatedString(tle.rawTle))
-                                        Toast.makeText(context, "کدهای TLE به حافظه منتقل شد", Toast.LENGTH_SHORT).show()
+                                        val toastMsg = t("کدهای TLE به حافظه منتقل شد", "TLE codes copied to clipboard")
+                                        Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show()
                                     },
                                     onCalculatePass = { viewModel.calculatePass(tle) }
                                 )
@@ -385,7 +416,7 @@ fun TleScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "نسخه " + viewModel.getAppVersion(),
+                                text = t("نسخه ", "Version ") + viewModel.getAppVersion(),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -403,7 +434,7 @@ fun TleScreen(
                                 }
                             ) {
                                 Text(
-                                    text = "توسعه‌دهنده: بهرام پورعلی‌بابا",
+                                    text = t("توسعه‌دهنده: بهرام پورعلی‌بابا", "Developer: Bahram Pouralibaba"),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
@@ -531,6 +562,7 @@ fun ErrorBlock(message: String, onRetry: () -> Unit) {
 fun TleCard(
     tle: SatelliteTle,
     isFavorite: Boolean,
+    isEnglish: Boolean = false,
     onToggleFavorite: () -> Unit,
     onShare: () -> Unit,
     onDownload: () -> Unit,
@@ -543,6 +575,8 @@ fun TleCard(
     val isDark = androidx.compose.foundation.isSystemInDarkTheme()
     val cardBg = if (isDark) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.secondaryContainer
     val cardOnBg = if (isDark) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer
+
+    val t = { fa: String, en: String -> if (isEnglish) en else fa }
 
     Card(
         modifier = Modifier
@@ -592,7 +626,7 @@ fun TleCard(
                     ) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                            contentDescription = if (isFavorite) "حذف از علاقه‌مندی‌ها" else "افزودن به علاقه‌مندی‌ها",
+                            contentDescription = if (isFavorite) t("حذف از علاقه‌مندی‌ها", "Remove from favorites") else t("افزودن به علاقه‌مندی‌ها", "Add to favorites"),
                             tint = if (isFavorite) MaterialTheme.colorScheme.primary else cardOnBg.copy(alpha = 0.35f),
                             modifier = Modifier.size(24.dp)
                         )
@@ -602,7 +636,7 @@ fun TleCard(
                         shape = RoundedCornerShape(100.dp)
                     ) {
                         Text(
-                            text = "بروزرسانی جدید (LATEST)",
+                            text = t("بروزرسانی جدید (LATEST)", "LATEST UPDATE"),
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
@@ -627,7 +661,7 @@ fun TleCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "دریافت شده از Celestrak (TLE)",
+                        text = t("دریافت شده از Celestrak (TLE)", "Fetched from Celestrak (TLE)"),
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onTertiary,
                         fontWeight = FontWeight.Bold
@@ -684,7 +718,7 @@ fun TleCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("کپی کدهای TLE", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(t("کپی کدهای TLE", "Copy TLE Code"), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
 
                 Button(
@@ -706,7 +740,7 @@ fun TleCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("اشتراک‌گذاری", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(t("اشتراک‌گذاری", "Share"), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
 
@@ -729,7 +763,7 @@ fun TleCard(
                      modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("دانلود فایل TLE.txt", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(t("دانلود فایل TLE.txt", "Download TLE.txt file"), fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
 
             Button(
@@ -751,7 +785,7 @@ fun TleCard(
                      modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("محاسبه زمان گذر و بیشترین الویشن در ایستگاه شما", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(t("محاسبه زمان گذر و بیشترین الویشن در ایستگاه شما", "Predict pass & peak elevation at your station"), fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
 
             // Expandable Analyzed/Parsed TLE Dashboard (Space Craft physics)
@@ -777,7 +811,7 @@ fun TleCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "تحلیل پارامترهای فیزیکی و مداری",
+                            text = t("تحلیل پارامترهای فیزیکی و مداری", "Physical & Orbital Parameters Analysis"),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = cardOnBg
@@ -811,14 +845,14 @@ fun TleCard(
 
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ParameterItem(
-                            label = "شناسه مداری NORAD",
+                            label = t("شناسه مداری NORAD", "NORAD ID"),
                             value = tle.noradId,
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
                             valueColor = valueColor
                         )
                         ParameterItem(
-                            label = "طبقه‌بندی اطلاعاتی",
+                            label = t("طبقه‌بندی اطلاعاتی", "Classification"),
                             value = tle.classification,
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
@@ -828,14 +862,14 @@ fun TleCard(
                     HorizontalDivider(color = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color.White.copy(alpha = 0.4f), thickness = 1.dp)
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ParameterItem(
-                            label = "کد بین‌المللی پرتاب (Designator)",
-                            value = tle.designator.ifEmpty { "ندارد" },
+                            label = t("کد بین‌المللی پرتاب (Designator)", "International Launch Designator"),
+                            value = tle.designator.ifEmpty { t("ندارد", "None") },
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
                             valueColor = valueColor
                         )
                         ParameterItem(
-                            label = "زمان مرجع اندازه‌گیری (Epoch)",
+                            label = t("زمان مرجع اندازه‌گیری (Epoch)", "Epoch Measurement Date"),
                             value = tle.epoch,
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
@@ -845,14 +879,14 @@ fun TleCard(
                     HorizontalDivider(color = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color.White.copy(alpha = 0.4f), thickness = 1.dp)
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ParameterItem(
-                            label = "زاویه تمایل مداری (Inclination)",
+                            label = t("زاویه تمایل مداری (Inclination)", "Orbit Inclination"),
                             value = "${tle.inclination}°",
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
                             valueColor = valueColor
                         )
                         ParameterItem(
-                            label = "خروج از مرکز (Eccentricity)",
+                            label = t("خروج از مرکز (Eccentricity)", "Eccentricity"),
                             value = tle.eccentricity,
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
@@ -862,14 +896,14 @@ fun TleCard(
                     HorizontalDivider(color = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color.White.copy(alpha = 0.4f), thickness = 1.dp)
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ParameterItem(
-                            label = "سرعت دَوران (Mean Motion)",
-                            value = "${tle.meanMotion} دور در روز",
+                            label = t("سرعت دَوران (Mean Motion)", "Mean Motion / Speed"),
+                            value = tle.meanMotion + " " + t("دور در روز", "rev/day"),
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
                             valueColor = valueColor
                         )
                         ParameterItem(
-                            label = "شماره دَوران کل (Orbit Rev)",
+                            label = t("شماره دَوران کل (Orbit Rev)", "Total Orbit Rev"),
                             value = tle.revNumber,
                             modifier = Modifier.weight(1f),
                             labelColor = labelColor,
@@ -903,7 +937,7 @@ fun TleCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "تاریخچه ردیابی کدهای TLE (۵ مدرک اخیر)",
+                            text = t("تاریخچه ردیابی کدهای TLE (۵ مدرک اخیر)", "Historical TLE Tracking Logs (Last 5 periods)"),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = cardOnBg
@@ -964,13 +998,13 @@ fun TleCard(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text = if (index == 0) "آخرین بروزرسانی (تازه)" else "دوره مداری قبلی (${index})",
+                                        text = if (index == 0) t("آخرین بروزرسانی (تازه)", "Latest Update (Current Cyc)") else t("دوره مداری قبلی (${index})", "Previous Orbit Period (${index})"),
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.SemiBold,
                                         color = cardOnBg
                                     )
                                     Text(
-                                        text = "تاریخ اندازه‌گیری: ${historicalTle.epochDate}",
+                                        text = t("تاریخ اندازه‌گیری: ${historicalTle.epochDate}", "Measurement Date: ${historicalTle.epochDate}"),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = cardOnBg.copy(alpha = 0.7f)
                                     )
@@ -979,7 +1013,7 @@ fun TleCard(
                             
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "جزئیات",
+                                    text = t("جزئیات", "Details"),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
@@ -1028,12 +1062,12 @@ fun TleCard(
                     )
                     Column {
                         Text(
-                            text = "جزئیات تاریخچه TLE",
+                            text = t("جزئیات تاریخچه TLE", "Historical TLE Details"),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "تاریخ: ${histTle.epochDate}",
+                            text = t("تاریخ: ${histTle.epochDate}", "Date: ${histTle.epochDate}"),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -1060,7 +1094,7 @@ fun TleCard(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "داده مداری TLE (تاریخچه)",
+                                    text = t("داده مداری TLE (تاریخچه)", "TLE Orbital Data (History)"),
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onTertiary,
                                     fontWeight = FontWeight.Bold
@@ -1068,13 +1102,14 @@ fun TleCard(
                                 IconButton(
                                     onClick = {
                                         clipboardManager.setText(AnnotatedString(histTle.rawTle))
-                                        Toast.makeText(context, "کدهای TLE به حافظه منتقل شد", Toast.LENGTH_SHORT).show()
+                                        val toastMsg = t("کدهای TLE به حافظه منتقل شد", "TLE codes copied to clipboard")
+                                        Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show()
                                     },
                                     modifier = Modifier.size(24.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.ContentCopy,
-                                        contentDescription = "کپی کدهای TLE",
+                                        contentDescription = t("کپی کدهای TLE", "Copy TLE Code"),
                                         tint = MaterialTheme.colorScheme.onTertiary,
                                         modifier = Modifier.size(14.dp)
                                     )
@@ -1106,25 +1141,25 @@ fun TleCard(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "پارامترهای فیزیکی محاسبه‌شده:",
+                                text = t("پارامترهای فیزیکی محاسبه‌شده:", "Calculated Physical Parameters:"),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
                             
-                            ParameterRow(label = "زمان اندازه‌گیری (Epoch)", value = histTle.epoch)
-                            ParameterRow(label = "تمایل مداری (Inclination)", value = "${histTle.inclination}°")
-                            ParameterRow(label = "خروج از مرکز (Eccentricity)", value = histTle.eccentricity)
-                            ParameterRow(label = "سرعت دوران (Mean Motion)", value = "${histTle.meanMotion} دور/روز")
-                            ParameterRow(label = "شماره مدار (Rev Number)", value = histTle.revNumber)
+                            ParameterRow(label = t("زمان اندازه‌گیری (Epoch)", "Epoch Measurement Time"), value = histTle.epoch)
+                            ParameterRow(label = t("تمایل مداری (Inclination)", "Orbit Inclination"), value = "${histTle.inclination}°")
+                            ParameterRow(label = t("خروج از مرکز (Eccentricity)", "Eccentricity"), value = histTle.eccentricity)
+                            ParameterRow(label = t("سرعت دوران (Mean Motion)", "Mean Motion / Speed"), value = histTle.meanMotion + " " + t("دور/روز", "rev/day"))
+                            ParameterRow(label = t("شماره مدار (Rev Number)", "Orbit Rev Number"), value = histTle.revNumber)
                         }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { selectedHistoryTle = null }) {
-                    Text("بستن", fontWeight = FontWeight.Bold)
+                    Text(t("بستن", "Dismiss"), fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -1288,6 +1323,8 @@ fun SettingsDialog(
     onDismiss: () -> Unit
 ) {
     val groundStations by viewModel.groundStations.collectAsState()
+    val isEnglish by viewModel.isEnglish.collectAsState()
+    val t = { fa: String, en: String -> if (isEnglish) en else fa }
     
     var nameState by remember { mutableStateOf("") }
     var latState by remember { mutableStateOf("") }
@@ -1300,11 +1337,11 @@ fun SettingsDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "تنظیمات ایستگاه زمینی و موقعیت",
+                t("تنظیمات ایستگاه زمینی و موقعیت", "Ground Station & Location Settings"),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Right,
+                textAlign = if (isEnglish) TextAlign.Left else TextAlign.Right,
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -1316,7 +1353,10 @@ fun SettingsDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    "موقعیت مکان‌گیر را برای اندازه‌گیری دقیق زاویه دید و زمان‌های عبور ماهواره‌ها ذخیره کنید. حداکثر ۱۰ ایستگاه مجاز است.",
+                    t(
+                        "موقعیت مکان‌گیر را برای اندازه‌گیری دقیق زاویه دید و زمان‌های عبور ماهواره‌ها ذخیره کنید. حداکثر ۱۰ ایستگاه مجاز است.",
+                        "Save observer coordinates to accurately calculate visibility times and satellite pass events. Maximum 10 stations allowed."
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 18.sp
@@ -1325,14 +1365,14 @@ fun SettingsDialog(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 Text(
-                    "ایستگاه‌های ثبت‌شده:",
+                    t("ایستگاه‌های ثبت‌شده:", "Registered Observer Stations:"),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
 
                 if (groundStations.isEmpty()) {
                     Text(
-                        "هیچ ایستگاهی یافت نشد.",
+                        t("هیچ ایستگاهی یافت نشد.", "No registered stations found."),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -1378,7 +1418,7 @@ fun SettingsDialog(
                                                     shape = RoundedCornerShape(4.dp)
                                                 ) {
                                                     Text(
-                                                        text = "پرکاربرد",
+                                                        text = t("پرکاربرد", "Primary"),
                                                         fontSize = 10.sp,
                                                         color = MaterialTheme.colorScheme.onPrimary,
                                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -1389,7 +1429,10 @@ fun SettingsDialog(
                                         }
                                         Spacer(modifier = Modifier.height(4.dp))
                                         Text(
-                                            text = "عرض: ${station.latitude}° | طول: ${station.longitude}° | ارتفاع: ${station.altitude}متر",
+                                            text = t(
+                                                "عرض: ${station.latitude}° | طول: ${station.longitude}° | ارتفاع: ${station.altitude}متر",
+                                                "Lat: ${station.latitude}° | Lng: ${station.longitude}° | Alt: ${station.altitude}m"
+                                            ),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = if (station.isPrimary) 
                                                 MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) 
@@ -1409,7 +1452,7 @@ fun SettingsDialog(
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.CheckCircle,
-                                                    contentDescription = "انتخاب به عنوان پرکاربرد",
+                                                    contentDescription = t("انتخاب به عنوان پرکاربرد", "Set as active primary"),
                                                     tint = MaterialTheme.colorScheme.secondary,
                                                     modifier = Modifier.size(20.dp)
                                                 )
@@ -1423,7 +1466,7 @@ fun SettingsDialog(
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Delete,
-                                                    contentDescription = "حذف ایستگاه",
+                                                    contentDescription = t("حذف ایستگاه", "Delete station"),
                                                     tint = MaterialTheme.colorScheme.error,
                                                     modifier = Modifier.size(20.dp)
                                                 )
@@ -1448,7 +1491,7 @@ fun SettingsDialog(
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("افزودن ایستگاه زمینی جدید", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(t("افزودن ایستگاه زمینی جدید", "Add New Ground Station"), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -1465,7 +1508,7 @@ fun SettingsDialog(
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Text(
-                                "افزودن ایستگاه نو:",
+                                t("افزودن ایستگاه نو:", "Create Observer Station:"),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -1474,8 +1517,8 @@ fun SettingsDialog(
                             OutlinedTextField(
                                 value = nameState,
                                 onValueChange = { nameState = it },
-                                label = { Text("نام ایستگاه") },
-                                placeholder = { Text("مثلاً: رصدخانه تهران") },
+                                label = { Text(t("نام ایستگاه", "Station Name")) },
+                                placeholder = { Text(t("مثلاً: رصدخانه تهران", "e.g. Tehran Observatory")) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -1483,8 +1526,8 @@ fun SettingsDialog(
                             OutlinedTextField(
                                 value = latState,
                                 onValueChange = { latState = it },
-                                label = { Text("عرض جغرافیایی (Latitude)") },
-                                placeholder = { Text("بین ۹۰ تا ۹۰- درجه") },
+                                label = { Text(t("عرض جغرافیایی (Latitude)", "Latitude (degrees)")) },
+                                placeholder = { Text(t("بین ۹۰ تا ۹۰- درجه", "Between -90 and 90")) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
@@ -1493,8 +1536,8 @@ fun SettingsDialog(
                             OutlinedTextField(
                                 value = lngState,
                                 onValueChange = { lngState = it },
-                                label = { Text("طول جغرافیایی (Longitude)") },
-                                placeholder = { Text("بین ۱۸۰ تا ۱۸۰- درجه") },
+                                label = { Text(t("طول جغرافیایی (Longitude)", "Longitude (degrees)")) },
+                                placeholder = { Text(t("بین ۱۸۰ تا ۱۸۰- درجه", "Between -180 and 180")) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
@@ -1503,8 +1546,8 @@ fun SettingsDialog(
                             OutlinedTextField(
                                 value = altState,
                                 onValueChange = { altState = it },
-                                label = { Text("ارتفاع از سطح دریا (متر)") },
-                                placeholder = { Text("به عدد، مثلاً ۱۲۰۰") },
+                                label = { Text(t("ارتفاع از سطح دریا (متر)", "Elevation (meters)")) },
+                                placeholder = { Text(t("به عدد، مثلاً ۱۲۰۰", "Number, e.g. 1200")) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
@@ -1530,15 +1573,15 @@ fun SettingsDialog(
                                         val altVal = altState.toDoubleOrNull() ?: 0.0
 
                                         if (nameState.trim().isEmpty()) {
-                                            errorMessage = "نام ایستگاه نمی‌تواند خالی باشد."
+                                            errorMessage = t("نام ایستگاه نمی‌تواند خالی باشد.", "Station name cannot be empty.")
                                             return@Button
                                         }
                                         if (latVal == null || latVal < -90.0 || latVal > 90.0) {
-                                            errorMessage = "عرض جغرافیایی معتبر بین -۹۰ و ۹۰ وارد کنید."
+                                            errorMessage = t("عرض جغرافیایی معتبر بین -۹۰ و ۹۰ وارد کنید.", "Enter valid latitude between -90 and 90.")
                                             return@Button
                                         }
                                         if (lngVal == null || lngVal < -180.0 || lngVal > 180.0) {
-                                            errorMessage = "طول جغرافیایی معتبر بین -۱۸۰ و ۱۸۰ وارد کنید."
+                                            errorMessage = t("طول جغرافیایی معتبر بین -۱۸۰ و ۱۸۰ وارد کنید.", "Enter valid longitude between -180 and 180.")
                                             return@Button
                                         }
 
@@ -1557,12 +1600,12 @@ fun SettingsDialog(
                                             errorMessage = null
                                             showAddForm = false
                                         } else {
-                                            errorMessage = "امکان افزودن ایستگاه بیشتر ندارید (حداکثر ۱۰ ایستگاه)."
+                                            errorMessage = t("امکان افزودن ایستگاه بیشتر ندارید (حداکثر ۱۰ ایستگاه).", "Station limit reached (maximum 10 allowed).")
                                         }
                                     },
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("ذخیره ایستگاه")
+                                    Text(t("ذخیره ایستگاه", "Save Location"))
                                 }
 
                                 OutlinedButton(
@@ -1572,7 +1615,7 @@ fun SettingsDialog(
                                     },
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("انصراف")
+                                    Text(t("انصراف", "Cancel"))
                                 }
                             }
                         }
@@ -1585,7 +1628,7 @@ fun SettingsDialog(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("تایید و بستن")
+                Text(t("تایید و بستن", "Confirm & Close"))
             }
         }
     )
@@ -1599,6 +1642,8 @@ fun PassResultDialog(
     viewModel: TleViewModel
 ) {
     val groundStations by viewModel.groundStations.collectAsState()
+    val isEnglish by viewModel.isEnglish.collectAsState()
+    val t = { fa: String, en: String -> if (isEnglish) en else fa }
     val activeStation = groundStations.firstOrNull { it.isPrimary } ?: groundStations.firstOrNull()
 
     fun formatTime(epochMs: Long): String {
@@ -1627,11 +1672,11 @@ fun PassResultDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "پیش‌بینی گذر ماهواره",
+                t("پیش‌بینی گذر ماهواره", "Satellite Pass Prediction"),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Right,
+                textAlign = if (isEnglish) TextAlign.Left else TextAlign.Right,
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -1643,7 +1688,7 @@ fun PassResultDialog(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Text(
-                    text = "ماهواره: $satelliteName",
+                    text = t("ماهواره: $satelliteName", "Satellite: $satelliteName"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -1658,7 +1703,7 @@ fun PassResultDialog(
                     ) {
                         Column(modifier = Modifier.padding(10.dp)) {
                             Text(
-                                text = "ایستگاه محاسباتی فعال:",
+                                text = t("ایستگاه محاسباتی فعال:", "Active Ground Station:"),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold
@@ -1688,7 +1733,7 @@ fun PassResultDialog(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "در ۲۴ ساعت آینده گذری با زاویه بیش از ۱۰ درجه در این ایستگاه یافت نشد.",
+                            text = t("در ۲۴ ساعت آینده گذری با زاویه بیش از ۱۰ درجه در این ایستگاه یافت نشد.", "No passes with peak elevation above 10° found in the next 24 hours at this station."),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error,
@@ -1697,7 +1742,7 @@ fun PassResultDialog(
                     }
                 } else {
                     Text(
-                        text = "تعداد گذر محاسبه شده: ${passes.size} گذر در ۲۴ ساعت آینده",
+                        text = t("تعداد گذر محاسبه شده: ${passes.size} گذر در ۲۴ ساعت آینده", "Calculated Passes: ${passes.size} pass(es) in the next 24 hours"),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold
@@ -1722,7 +1767,7 @@ fun PassResultDialog(
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
-                                        text = " گذر شماره ${index + 1} ",
+                                        text = t(" گذر شماره ${index + 1} ", " Pass No. ${index + 1} "),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.secondary,
@@ -1750,20 +1795,20 @@ fun PassResultDialog(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "بخش / رویداد",
+                                            text = t("بخش / رویداد", "Event / Phase"),
                                             style = MaterialTheme.typography.labelMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.weight(1.2f),
-                                            textAlign = TextAlign.Right
+                                            textAlign = if (isEnglish) TextAlign.Left else TextAlign.Right
                                         )
                                         Text(
-                                            text = "زمان / جزئیات",
+                                            text = t("زمان / جزئیات", "Time / Details"),
                                             style = MaterialTheme.typography.labelMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.weight(1.5f),
-                                            textAlign = TextAlign.Left
+                                            textAlign = if (isEnglish) TextAlign.Right else TextAlign.Left
                                         )
                                     }
 
@@ -1772,7 +1817,7 @@ fun PassResultDialog(
                                     // Row 1: Date
                                     PassTableRow(
                                         icon = Icons.Default.DateRange,
-                                        label = "تاریخ گذر",
+                                        label = t("تاریخ گذر", "Pass Date"),
                                         value = formatDate(pass.startEpochMs)
                                     )
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -1780,7 +1825,7 @@ fun PassResultDialog(
                                     // Row 2: Sunrise (Start)
                                     PassTableRow(
                                         icon = Icons.Default.Schedule,
-                                        label = "طلوع (شروع گذر)",
+                                        label = t("طلوع (شروع گذر)", "AOS (Start of Pass)"),
                                         value = formatTime(pass.startEpochMs)
                                     )
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -1788,7 +1833,7 @@ fun PassResultDialog(
                                     // Row 3: Apex (Peak Elevation)
                                     PassTableRow(
                                         icon = Icons.Default.MyLocation,
-                                        label = "اوج (بیشترین ارتفاع)",
+                                        label = t("اوج (بیشترین ارتفاع)", "Apex (Max Elevation)"),
                                         value = formatTime(pass.maxElevationTimeMs),
                                         accentContent = {
                                             Surface(
@@ -1810,7 +1855,7 @@ fun PassResultDialog(
                                     // Row 4: Sunset (End)
                                     PassTableRow(
                                         icon = Icons.Default.Schedule,
-                                        label = "غروب (پایان گذر)",
+                                        label = t("غروب (پایان گذر)", "LOS (End of Pass)"),
                                         value = formatTime(pass.endEpochMs)
                                     )
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -1818,8 +1863,11 @@ fun PassResultDialog(
                                     // Row 5: Duration
                                     PassTableRow(
                                         icon = Icons.Default.Info,
-                                        label = "مدت حضور در آسمان",
-                                        value = "$durationMin دقیقه و " + String.format(java.util.Locale.US, "%02d", durationSec) + " ثانیه"
+                                        label = t("مدت حضور در آسمان", "Visibility Duration"),
+                                        value = t(
+                                            "$durationMin دقیقه و " + String.format(java.util.Locale.US, "%02d", durationSec) + " ثانیه",
+                                            "$durationMin min and " + String.format(java.util.Locale.US, "%02d", durationSec) + " sec"
+                                        )
                                     )
                                 }
                             }
@@ -1833,7 +1881,7 @@ fun PassResultDialog(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("متوجه شدم")
+                Text(t("متوجه شدم", "Got it"))
             }
         },
         dismissButton = {
@@ -1861,7 +1909,7 @@ fun PassResultDialog(
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
-                        Text("اشتراک‌گذاری PDF")
+                        Text(t("اشتراک‌گذاری PDF", "Share PDF Report"))
                     }
                 }
             }
@@ -1894,7 +1942,7 @@ fun PassTableRow(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1.2f),
-            textAlign = TextAlign.Right
+            textAlign = TextAlign.Start
         )
         Row(
             modifier = Modifier.weight(1.5f),
@@ -1911,7 +1959,7 @@ fun PassTableRow(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Left,
+                textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth()
             )
         }

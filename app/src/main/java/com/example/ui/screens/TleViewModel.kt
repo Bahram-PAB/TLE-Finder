@@ -31,6 +31,15 @@ class TleViewModel(
 
     private val sharedPrefs = application.getSharedPreferences("tle_prefs", Context.MODE_PRIVATE)
 
+    private val _isEnglish = MutableStateFlow(sharedPrefs.getBoolean("is_english", false))
+    val isEnglish: StateFlow<Boolean> = _isEnglish.asStateFlow()
+
+    fun toggleLanguage() {
+        val newValue = !_isEnglish.value
+        sharedPrefs.edit().putBoolean("is_english", newValue).apply()
+        _isEnglish.value = newValue
+    }
+
     private val _favorites = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val favorites: StateFlow<List<Pair<String, String>>> = _favorites.asStateFlow()
 
@@ -192,9 +201,9 @@ class TleViewModel(
     fun getAppVersion(): String {
         return try {
             val packageInfo = getApplication<Application>().packageManager.getPackageInfo(getApplication<Application>().packageName,0)
-            packageInfo.versionName ?: "2.5"
+            packageInfo.versionName ?: "2.6"
         } catch (e: Exception) {
-            "2.5"
+            "2.6"
         }
     }
 
