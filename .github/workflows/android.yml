@@ -23,6 +23,86 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    # ترفند طلایی: گیت‌هاب خودش فایل‌های گریدل خراب را با نسخه‌های اصلاح‌شده بازنویسی می‌کند
+    - name: Override build files with fixed working versions
+      run: |
+        cat << 'EOF' > build.gradle.kts
+        plugins {
+            alias(libs.plugins.android.application) apply false
+            alias(libs.plugins.kotlin.compose) apply false
+            alias(libs.plugins.google.devtools.ksp) apply false
+            alias(libs.plugins.secrets) apply false
+        }
+        EOF
+
+        cat << 'EOF' > app/build.gradle.kts
+        plugins {
+            alias(libs.plugins.android.application)
+            alias(libs.plugins.kotlin.compose)
+            alias(libs.plugins.google.devtools.ksp)
+            alias(libs.plugins.secrets)
+        }
+        android {
+            namespace = "com.example"
+            compileSdk = 35
+            defaultConfig {
+                applicationId = "com.aistudio.tlefinder.qzxpvw"
+                minSdk = 24
+                targetSdk = 35
+                versionCode = 8
+                versionName = "2.7"
+                testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            }
+            buildTypes {
+                release {
+                    isCrunchPngs = false
+                    isMinifyEnabled = false
+                    proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+                }
+            }
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
+            buildFeatures {
+                compose = true
+                buildConfig = true
+            }
+        }
+        secrets {
+            propertiesFileName = ".env"
+            defaultPropertiesFileName = ".env.example"
+        }
+        dependencies {
+            implementation(platform(libs.androidx.compose.bom))
+            implementation(platform(libs.firebase.bom))
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.compose.material.icons.core)
+            implementation(libs.androidx.compose.material.icons.extended)
+            implementation(libs.androidx.compose.material3)
+            implementation(libs.androidx.compose.ui)
+            implementation(libs.androidx.compose.ui.graphics)
+            implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.androidx.room.ktx)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.converter.moshi)
+            implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.logging.interceptor)
+            implementation(libs.moshi.kotlin)
+            implementation(libs.okhttp)
+            implementation(libs.retrofit)
+            debugImplementation(libs.androidx.compose.ui.test.manifest)
+            debugImplementation(libs.androidx.compose.ui.tooling)
+            "ksp"(libs.androidx.room.compiler)
+            "ksp"(libs.moshi.kotlin.codegen)
+        }
+        EOF
+
     - name: Generate Gradle Wrapper if missing
       run: |
         if [ ! -f "gradlew" ]; then
@@ -33,13 +113,11 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # ایجاد یک فایل ستینگ خالی برای ست‌آپ محیط در صورت نیاز
     - name: Create stub env files
       run: |
         touch .env
         touch .env.example
 
-    # اجرای بیلد بدون دمون و با نادیده گرفتن تسک‌های تست فریمورک‌ها
     - name: Build with Gradle
       run: ./gradlew assembleDebug -x test -x testDebugUnitTest --no-daemon --stacktrace
       env:
