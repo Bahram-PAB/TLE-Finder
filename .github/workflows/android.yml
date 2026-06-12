@@ -23,20 +23,20 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # ترفند فوق‌العاده برای آپدیت نسخه‌ها و حل ریشه‌ای ارور KSP
+    # تنظیم نسخه‌ها روی نسل کاتلین ۲ برای هماهنگی با کدهای مدرن AI Studio
     - name: Force Update Version Catalog (libs.versions.toml)
       run: |
         mkdir -p gradle
         cat << 'EOF' > gradle/libs.versions.toml
         [versions]
-        agp = "8.3.2"
-        kotlin = "1.9.23"
-        ksp = "1.9.23-1.0.19"
-        composeBom = "2024.04.00"
-        firebaseBom = "32.8.0"
-        coreKtx = "1.12.0"
-        lifecycle = "2.7.0"
-        activityCompose = "1.8.2"
+        agp = "8.4.0"
+        kotlin = "2.0.0"
+        ksp = "2.0.0-1.0.21"
+        composeBom = "2024.05.00"
+        firebaseBom = "33.0.0"
+        coreKtx = "1.13.0"
+        lifecycle = "2.8.0"
+        activityCompose = "1.9.0"
         room = "2.6.1"
         moshi = "1.15.1"
         retrofit = "2.11.0"
@@ -78,7 +78,6 @@ jobs:
         kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version = "1.8.0" }
         EOF
 
-    # اورراید کردن فایل گریدل اصلی
     - name: Override Root Build File
       run: |
         cat << 'EOF' > build.gradle.kts
@@ -90,7 +89,6 @@ jobs:
         }
         EOF
 
-    # اورراید کردن فایل گریدل اپلیکیشن
     - name: Override App Build File
       run: |
         cat << 'EOF' > app/build.gradle.kts
@@ -134,8 +132,6 @@ jobs:
             implementation(platform(libs.androidx.compose.bom))
             implementation(platform(libs.firebase.bom))
             implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.compose.material.icons.core)
-            implementation(libs.androidx.compose.material.icons.extended)
             implementation(libs.androidx.compose.material3)
             implementation(libs.androidx.compose.ui)
             implementation(libs.androidx.compose.ui.graphics)
