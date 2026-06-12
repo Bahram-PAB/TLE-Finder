@@ -23,6 +23,15 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    # ترفند حیاتی: ایجاد خودکار فایل gradle.properties برای فعال‌سازی AndroidX و حل ارور جدید
+    - name: Create or Update gradle.properties
+      run: |
+        cat << 'EOF' > gradle.properties
+        android.useAndroidX=true
+        android.enableJetifier=true
+        org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+        EOF
+
     # تنظیم نسخه‌ها روی نسل کاتلین ۲ برای هماهنگی با کدهای مدرن AI Studio
     - name: Force Update Version Catalog (libs.versions.toml)
       run: |
@@ -171,14 +180,6 @@ jobs:
         touch .env
         touch .env.example
 
-    # اجرای نهایی کامپایل با غیرفعال کردن کش مشکل‌ساز گریدل
+    # اجرای کامپایل نهایی با مسدود کردن کش و تایید ساختار اندروید ایکس
     - name: Build with Gradle
       run: ./gradlew assembleDebug -x test -x testDebugUnitTest --no-daemon --no-configuration-cache --stacktrace
-      env:
-        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
