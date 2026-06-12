@@ -78,6 +78,7 @@ jobs:
         kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version = "1.8.0" }
         EOF
 
+    # اورراید کردن فایل گریدل اصلی برای اطمینان از سازگاری
     - name: Override Root Build File
       run: |
         cat << 'EOF' > build.gradle.kts
@@ -89,6 +90,7 @@ jobs:
         }
         EOF
 
+    # اورراید کردن فایل گریدل اپلیکیشن برای رفع خطاهای ساختار ابری
     - name: Override App Build File
       run: |
         cat << 'EOF' > app/build.gradle.kts
@@ -169,8 +171,9 @@ jobs:
         touch .env
         touch .env.example
 
+    # اجرای نهایی کامپایل با غیرفعال کردن کش مشکل‌ساز گریدل
     - name: Build with Gradle
-      run: ./gradlew assembleDebug -x test -x testDebugUnitTest --no-daemon --stacktrace
+      run: ./gradlew assembleDebug -x test -x testDebugUnitTest --no-daemon --no-configuration-cache --stacktrace
       env:
         GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
