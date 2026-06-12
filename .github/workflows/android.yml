@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,170 +13,27 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: set up JDK 17
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
 
-    # ترفند حیاتی: ایجاد خودکار فایل gradle.properties برای فعال‌سازی AndroidX و حل ارور جدید
-    - name: Create or Update gradle.properties
-      run: |
-        cat << 'EOF' > gradle.properties
-        android.useAndroidX=true
-        android.enableJetifier=true
-        org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
-        EOF
-
-    # تنظیم نسخه‌ها روی نسل کاتلین ۲ برای هماهنگی با کدهای مدرن AI Studio
-    - name: Force Update Version Catalog (libs.versions.toml)
-      run: |
-        mkdir -p gradle
-        cat << 'EOF' > gradle/libs.versions.toml
-        [versions]
-        agp = "8.4.0"
-        kotlin = "2.0.0"
-        ksp = "2.0.0-1.0.21"
-        composeBom = "2024.05.00"
-        firebaseBom = "33.0.0"
-        coreKtx = "1.13.0"
-        lifecycle = "2.8.0"
-        activityCompose = "1.9.0"
-        room = "2.6.1"
-        moshi = "1.15.1"
-        retrofit = "2.11.0"
-        okhttp = "4.12.0"
-
-        [plugins]
-        android-application = { id = "com.android.application", version.ref = "agp" }
-        kotlin-compose = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-        google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-        secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1" }
-
-        [libraries]
-        androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-        androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
-        androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
-        androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-        androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-        androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-        androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-        androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
-        androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-        androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-        androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-        androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-internal" }
-        androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-        androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
-        androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-        firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-        androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-        androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-        androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-        moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
-        moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
-        retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-        converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
-        okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-        logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-        kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.8.0" }
-        kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version = "1.8.0" }
-        EOF
-
-    # اورراید کردن فایل گریدل اصلی برای اطمینان از سازگاری
-    - name: Override Root Build File
-      run: |
-        cat << 'EOF' > build.gradle.kts
-        plugins {
-            alias(libs.plugins.android.application) apply false
-            alias(libs.plugins.kotlin.compose) apply false
-            alias(libs.plugins.google.devtools.ksp) apply false
-            alias(libs.plugins.secrets) apply false
-        }
-        EOF
-
-    # اورراید کردن فایل گریدل اپلیکیشن برای رفع خطاهای ساختار ابری
-    - name: Override App Build File
-      run: |
-        cat << 'EOF' > app/build.gradle.kts
-        plugins {
-            alias(libs.plugins.android.application)
-            alias(libs.plugins.kotlin.compose)
-            alias(libs.plugins.google.devtools.ksp)
-            alias(libs.plugins.secrets)
-        }
-        android {
-            namespace = "com.example"
-            compileSdk = 34
-            defaultConfig {
-                applicationId = "com.aistudio.tlefinder.qzxpvw"
-                minSdk = 24
-                targetSdk = 34
-                versionCode = 8
-                versionName = "2.7"
-            }
-            buildTypes {
-                release {
-                    isCrunchPngs = false
-                    isMinifyEnabled = false
-                    proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-                }
-            }
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
-            }
-            buildFeatures {
-                compose = true
-                buildConfig = true
-            }
-        }
-        secrets {
-            propertiesFileName = ".env"
-            defaultPropertiesFileName = ".env.example"
-        }
-        dependencies {
-            implementation(platform(libs.androidx.compose.bom))
-            implementation(platform(libs.firebase.bom))
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.compose.material3)
-            implementation(libs.androidx.compose.ui)
-            implementation(libs.androidx.compose.ui.graphics)
-            implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.androidx.core.ktx)
-            implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.androidx.lifecycle.runtime.ktx)
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
-            implementation(libs.androidx.room.ktx)
-            implementation(libs.androidx.room.runtime)
-            implementation(libs.converter.moshi)
-            implementation(libs.kotlinx.coroutines.android)
-            implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.logging.interceptor)
-            implementation(libs.moshi.kotlin)
-            implementation(libs.okhttp)
-            implementation(libs.retrofit)
-            "ksp"(libs.androidx.room.compiler)
-            "ksp"(libs.moshi.kotlin.codegen)
-        }
-        EOF
-
-    - name: Generate Gradle Wrapper if missing
-      run: |
-        if [ ! -f "gradlew" ]; then
-          npm install -g gradle
-          gradle wrapper
-        fi
-
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Create stub env files
+    - name: Create stub .env files
       run: |
-        touch .env
-        touch .env.example
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+        echo "GEMINI_API_KEY=MY_GEMINI_API_KEY" > .env.example
 
-    # اجرای کامپایل نهایی با مسدود کردن کش و تایید ساختار اندروید ایکس
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug -x test -x testDebugUnitTest --no-daemon --no-configuration-cache --stacktrace
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
+        if-no-files-found: error
