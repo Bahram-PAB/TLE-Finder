@@ -90,24 +90,30 @@ fun TleScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = { viewModel.toggleLanguage() },
-                        modifier = Modifier.testTag("language_toggle_button")
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 12.dp, end = 4.dp)
+                            .sizeIn(minWidth = 72.dp, minHeight = 44.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { viewModel.toggleLanguage() }
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                            .testTag("language_toggle_button"),
+                        contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(horizontal = 4.dp)
+                            horizontalArrangement = Arrangement.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Language,
                                 contentDescription = "تغییر زبان / Change Language",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = if (isEnglish) "FA" else "EN",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground
                             )

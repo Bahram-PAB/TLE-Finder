@@ -201,9 +201,9 @@ class TleViewModel(
     fun getAppVersion(): String {
         return try {
             val packageInfo = getApplication<Application>().packageManager.getPackageInfo(getApplication<Application>().packageName,0)
-            packageInfo.versionName ?: "2.6"
+            packageInfo.versionName ?: "2.7"
         } catch (e: Exception) {
-            "2.6"
+            "2.7"
         }
     }
 
