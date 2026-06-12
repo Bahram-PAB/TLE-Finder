@@ -1,0 +1,8 @@
+{
+  "name": "Remix: TLE Finder",
+  "description": "A powerful tool to search and retrieve satellite TLE data by Name or Norad ID, with easy options to share or download the elements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
