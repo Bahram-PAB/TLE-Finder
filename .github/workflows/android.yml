@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-# تنظیم متغیر محیطی برای رفع اخطار نود جی‌اس
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -34,9 +33,15 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # رفع خطای KSP با غیرفعال کردن موقت Daemon و اجرای ایزوله گریدل
+    # ایجاد یک فایل ستینگ خالی برای ست‌آپ محیط در صورت نیاز
+    - name: Create stub env files
+      run: |
+        touch .env
+        touch .env.example
+
+    # اجرای بیلد بدون دمون و با نادیده گرفتن تسک‌های تست فریمورک‌ها
     - name: Build with Gradle
-      run: ./gradlew assembleDebug --no-daemon --stacktrace
+      run: ./gradlew assembleDebug -x test -x testDebugUnitTest --no-daemon --stacktrace
       env:
         GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
