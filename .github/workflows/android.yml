@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# تنظیم متغیر محیطی برای رفع اخطار نود جی‌اس
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,8 +34,11 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    # رفع خطای KSP با غیرفعال کردن موقت Daemon و اجرای ایزوله گریدل
     - name: Build with Gradle
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --no-daemon --stacktrace
+      env:
+        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
