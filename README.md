@@ -1,17 +1,15 @@
 <div align="center">
-<img width="1536" height="2752" alt="این_تصویر_رو_روی_ی_202606130029" src="https://github.com/user-attachments/assets/966b2afd-4636-4616-966f-2f46006008af" />
+<img width="768" height="1376" alt="این_تصویر_رو_روی_ی_202606130029" src="https://github.com/user-attachments/assets/966b2afd-4636-4616-966f-2f46006008af" />
 </div>
 
-
+<div align="center">
+<img width="717" height="1488" alt="Gemini_Generated_Image_z1pzfdz1pzfdz1pz" src="https://github.com/user-attachments/assets/fe54f3c2-f7d8-44dd-b208-af52d540336b" />
+</div>
 # Run and deploy your AI Studio app
 
 This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/bcdf862c-ab77-46a3-b533-b982e66c7633
-
-
-<img width="717" height="1488" alt="Gemini_Generated_Image_z1pzfdz1pzfdz1pz" src="https://github.com/user-attachments/assets/fe54f3c2-f7d8-44dd-b208-af52d540336b" />
-
 
 
 
