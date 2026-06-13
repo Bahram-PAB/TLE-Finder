@@ -429,27 +429,46 @@ fun TleScreen(
 
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.clickable {
-                                    try {
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.linkedin.com/in/bahram-pouralibaba-1a992239"))
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "خطا در باز کردن لینک: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Text(
-                                    text = t("توسعه‌دهنده: بهرام پورعلی‌بابا", "Developer: Bahram Pouralibaba"),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                // GitHub Icon Button
                                 Box(
                                     modifier = Modifier
-                                        .size(24.dp)
+                                        .size(28.dp)
+                                        .clip(RoundedCornerShape(percent = 50))
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                                        .clickable {
+                                            try {
+                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Bahram-PAB"))
+                                                context.startActivity(intent)
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "خطا در باز کردن لینک: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_github),
+                                        contentDescription = "GitHub",
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+
+                                // LinkedIn Icon Button
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(Color(0xFF0A66C2)),
+                                        .background(Color(0xFF0A66C2))
+                                        .clickable {
+                                            try {
+                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.linkedin.com/in/bahram-pouralibaba-1a992239"))
+                                                context.startActivity(intent)
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "خطا در باز کردن لینک: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -1336,6 +1355,7 @@ fun SettingsDialog(
     var latState by remember { mutableStateOf("") }
     var lngState by remember { mutableStateOf("") }
     var altState by remember { mutableStateOf("") }
+    var isPrimaryState by remember { mutableStateOf(false) }
     var showAddForm by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     
@@ -1559,6 +1579,25 @@ fun SettingsDialog(
                                 modifier = Modifier.fillMaxWidth()
                             )
 
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isPrimaryState = !isPrimaryState }
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Checkbox(
+                                    checked = isPrimaryState,
+                                    onCheckedChange = { isPrimaryState = it }
+                                )
+                                Text(
+                                    text = t("تنظیم به عنوان ایستگاه پیش‌فرض", "Set as default primary station"),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
                             errorMessage?.let { msg ->
                                 Text(
                                     text = msg,
@@ -1595,7 +1634,8 @@ fun SettingsDialog(
                                             name = nameState,
                                             lat = latVal,
                                             lng = lngVal,
-                                            alt = altVal
+                                            alt = altVal,
+                                            isPrimary = isPrimaryState
                                         )
 
                                         if (success) {
@@ -1603,6 +1643,7 @@ fun SettingsDialog(
                                             latState = ""
                                             lngState = ""
                                             altState = ""
+                                            isPrimaryState = false
                                             errorMessage = null
                                             showAddForm = false
                                         } else {
@@ -1617,6 +1658,7 @@ fun SettingsDialog(
                                 OutlinedButton(
                                     onClick = {
                                         showAddForm = false
+                                        isPrimaryState = false
                                         errorMessage = null
                                     },
                                     modifier = Modifier.weight(1f)

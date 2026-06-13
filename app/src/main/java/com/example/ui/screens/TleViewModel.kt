@@ -117,20 +117,27 @@ class TleViewModel(
         _groundStations.value = list.sortedByDescending { it.isPrimary }
     }
 
-    fun addGroundStation(name: String, lat: Double, lng: Double, alt: Double): Boolean {
+    fun addGroundStation(name: String, lat: Double, lng: Double, alt: Double, isPrimary: Boolean = false): Boolean {
         val current = _groundStations.value.toMutableList()
         if (current.size >= 10) {
             return false // Limit reached
         }
 
         val designator = name.trim().ifEmpty { "ایستگاه جدید" }
+        
+        if (isPrimary) {
+            for (i in current.indices) {
+                current[i] = current[i].copy(isPrimary = false)
+            }
+        }
+
         val newStation = GroundStation(
             id = UUID.randomUUID().toString(),
             name = designator,
             latitude = lat,
             longitude = lng,
             altitude = alt,
-            isPrimary = current.isEmpty()
+            isPrimary = isPrimary || current.isEmpty()
         )
         current.add(newStation)
         saveStationsList(current)
@@ -201,9 +208,9 @@ class TleViewModel(
     fun getAppVersion(): String {
         return try {
             val packageInfo = getApplication<Application>().packageManager.getPackageInfo(getApplication<Application>().packageName,0)
-            packageInfo.versionName ?: "2.7"
+            packageInfo.versionName ?: "2.8"
         } catch (e: Exception) {
-            "2.7"
+            "2.8"
         }
     }
 

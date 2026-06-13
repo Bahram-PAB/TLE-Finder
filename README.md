@@ -1,5 +1,5 @@
 <div align="center">
-<img width="768" height="1376" alt="این_تصویر_رو_روی_ی_202606130029" src="https://github.com/user-attachments/assets/966b2afd-4636-4616-966f-2f46006008af" />
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
 # Run and deploy your AI Studio app
@@ -8,11 +8,10 @@ This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/bcdf862c-ab77-46a3-b533-b982e66c7633
 
-
-
 ## Run Locally
 
 **Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+
 
 1. Open Android Studio
 2. Select **Open** and choose the directory containing this project
