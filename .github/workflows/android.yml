@@ -35,6 +35,18 @@ jobs:
         sed -i 's/compileSdk = 35/compileSdk = 36/g' app/build.gradle.kts
         sed -i 's/targetSdk = 35/targetSdk = 36/g' app/build.gradle.kts
 
+    - name: Generate debug keystore
+      run: |
+        keytool -genkeypair \
+          -keystore debug.keystore \
+          -alias androiddebugkey \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -storepass android \
+          -keypass android \
+          -dname "CN=Android Debug,O=Android,C=US"
+
     - name: Create .env files
       run: |
         API_KEY="${{ secrets.GEMINI_API_KEY }}"
