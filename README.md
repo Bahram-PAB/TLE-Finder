@@ -1,21 +1,21 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+<img width="700" height="1500" alt="این_تصویر_رو_روی_ی_202606130029" src="https://github.com/user-attachments/assets/f1c9609f-7efb-40af-84ea-fcb64c5fe858" />
 </div>
 
-# Run and deploy your AI Studio app
+اپلیکیشن TLE Finder یک ابزار مهندسی و جذاب برای ردیابی موقعیت ماهواره‌ها و پیش‌بینی زمان عبور (گذر) آن‌ها از بالای سر ایستگاه‌های زمینی انتخابی شماست. این برنامه از بردارهای مداری دوخطی یا همان کدهای TLE (Two-Line Element) برای محاسبه دقیق مسیر حرکت ماهواره‌ها استفاده می‌کند.
+در ادامه به وظایف اصلی و مهم‌ترین قابلیت‌های این اپلیکیشن اشاره می‌کنیم:
+🛰️ اهداف و کارکرد اصلی اپلیکیشن:
+کار اصلی برنامه این است که اطلاعات مداری ماهواره‌ها (مانند ایستگاه فضایی بین‌المللی - ISS یا هر ماهواره رصدی و مخابراتی دیگر) را دریافت کرده و با ترکیب ریاضی اطلاعات جغرافیایی ایستگاه زمینی شما (طول و عرض جغرافیایی و ارتفاع)، مشخص کند که ماهواره در چه زمان‌هایی، با چه زاویه‌ای و به چه مدت از دید ایستگاه شما عبور خواهد کرد.
+✨ قابلیت‌های کلیدی برنامه:
+۱. محاسبه هوشمند زمان گذر (Pass Prediction):
+با انتخاب هر ماهواره و ایستگاه رصدی، برنامه با دقت بالا پنجره‌های زمانی عبور ماهواره (شامل زمان دقیق طلوع، اوج و غروب ماهواره در آسمان شما) را محاسبه و به صورت مرتب نمایش می‌دهد.
+۲. مدیریت ایستگاه‌های رصدی (Ground Stations Management):
+امکان تعریف تا ۱۰ ایستگاه زمینی مختلف با نام دلخواه، عرض جغرافیایی (Latitude)، طول جغرافیایی (Longitude) و ارتفاع از سطح دریا (Altitude).
+امکان ویرایش کامل مشخصات هر ایستگاه ایجاد شده در هر زمان.
+۳. تنظیم ایستگاه پیش‌فرض (Primary Station):
+شما می‌توانید یکی از ایستگاه‌های خود را به عنوان ایستگاه اصلی (پیش‌فرض) تنظیم کنید. برنامه بلافاصله پس از فشردن دکمه «محاسبه»، محاسبات عبور ماهواره را بر اساس این ایستگاه انجام می‌دهد تا نیازی به هربار تنظیم تکراری نباشد.
+۴. پشتیبانی کامل از دو زبان (Bilingual Style):
+تغییر آنی زبان برنامه بین فارسی (FA) و انگلیسی (EN) از طریق دکمه اختصاصی در قسمت بالای صفحه (TopBar) برای تجربه کاربری روان‌تر.
+۵. طراحی بصری مدرن و زیبا (Material Design 3):
+محیط تاریک و هماهنگِ مدرن، استفاده از المان‌های پیشرفته طراحی، آیکون‌های شبکه اجتماعی (گیتهاب و لینکدین توسعه‌دهنده در فوتر) و پیام‌های راهنمای کاربرپسند به زبان‌های فارسی و انگلیسی.
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/bcdf862c-ab77-46a3-b533-b982e66c7633
-
-## Run Locally
-
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
-
-
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
