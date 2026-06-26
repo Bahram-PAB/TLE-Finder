@@ -1,5 +1,6 @@
 <div align="center">
-<img width="700" height="1500" alt="این_تصویر_رو_روی_ی_202606130029" src="https://github.com/user-attachments/assets/f1c9609f-7efb-40af-84ea-fcb64c5fe858" />
+<img width="700" height="1254" alt="bro-1" src="https://github.com/user-attachments/assets/903a99f3-5b73-48a7-b9cf-ff426b4a254a" />
+
 </div>
 
 <div align="right" dir="rtl">
